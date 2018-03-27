@@ -39,7 +39,7 @@ namespace ComputeService
                         dest = @"C:\users\stefan\Desktop\containers\Container";
                     }
                     else if (files.Length > 1)
-                        Console.WriteLine("ERROR: Onlu one dll at the time.");
+                        Console.WriteLine("ERROR: Only one dll at the time.");
                     else
                         Console.WriteLine("ERROR: Dll file missing from package.");
 
@@ -48,18 +48,16 @@ namespace ComputeService
                         string __dest = dest + (i + 1) + "\\" + fileName;
                         try
                         {
-                            File.Copy(src, __dest);                            
+                            File.Copy(src, __dest);
                         }
-                        catch(Exception e)
-                        {
-                        //    File.SetAttributes(__dest, FileAttributes.Normal);
-                        //    File.Delete(__dest);
-                        }
+                        catch (Exception e) { }
 
                         try
                         {
                             Connect(i);
                             proxy.Load((i + 1) + "\\" + fileName); // (i + 1) to load from appropriate folder
+                            File.Delete(dest + (i + 1) + "\\" + fileName);
+                            System.Threading.Thread.Sleep(200);
                         }
                         catch(Exception e) { Stop(i + 1); }
                     }
@@ -68,40 +66,6 @@ namespace ComputeService
                 }
             }
         }
-
-        /*
-        public void Start()
-        {
-            Process[] processes = new Process[4];
-            ProcessStartInfo startInfo = new ProcessStartInfo
-            {
-                FileName = "C:\\Users\\stefan\\Desktop\\Container.exe",
-                WindowStyle = ProcessWindowStyle.Minimized
-            };
-
-            Directory.CreateDirectory(@"C:\users\stefan\Desktop\containers");
-
-            int port = 10010;
-
-            for (int i = 0; i < 4; ++i)
-            {
-                try
-                {
-                    //process.StartInfo.UseShellExecute = true;
-                    startInfo.Arguments = (port + i * 10).ToString();
-                    processes[i] = new Process
-                    {
-                        StartInfo = startInfo
-                    };
-                    processes[i].Start();
-                    Directory.CreateDirectory(@"C:\users\stefan\Desktop\containers\Container" + (i + 1));
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e.Message);
-                }
-            }
-        }*/
         
         public void Stop()
         {
@@ -110,27 +74,15 @@ namespace ComputeService
                 //p.Close();
             
 
-            /*foreach(string dir in Directory.GetDirectories(@"C:\users\stefan\Desktop\containers\"))
+            foreach(string dir in Directory.GetDirectories(@"C:\users\stefan\Desktop\containers\"))
             {
-                DeleteFiles(dir);
                 Directory.Delete(dir);
-            }*/
+            }
         }
         public void Stop(int id)
-        {            
-            DeleteFiles(@"C:\users\stefan\Desktop\containers\Container" + id);
-
-            Directory.Delete(@"C:\users\stefan\Desktop\containers\Container" + id);
-        }
-
-        public void DeleteFiles(string uri)
         {
-            string[] files = Directory.GetFiles(uri);
-            foreach(string file in files)
-            {
-                File.SetAttributes(file, FileAttributes.Normal);
-                File.Delete(file);
-            }
+            File.Delete(@"C:\users\stefan\Desktop\containers\Container" + id);
+            Directory.Delete(@"C:\users\stefan\Desktop\containers\Container" + id);
         }
 
         // Connect to Containers WCF server

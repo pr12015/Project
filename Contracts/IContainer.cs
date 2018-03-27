@@ -14,5 +14,7 @@ namespace Contracts
 
         [OperationContract]
         string Load_c();
+
+
     }
 } // namespace Contracts
