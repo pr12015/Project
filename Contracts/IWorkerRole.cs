@@ -4,9 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ComputeService
+namespace Contracts
 {
-    interface ICompute
+    public interface IWorkerRole
     {
+        void Start();
+        void Stop();
     }
-}
+} // namespace Contracts
