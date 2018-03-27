@@ -9,6 +9,6 @@ namespace Contracts
     public interface IWorkerRole
     {
         void Start();
-        void Stop();
+        void Stop(int id);
     }
 } // namespace Contracts

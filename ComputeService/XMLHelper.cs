@@ -13,11 +13,12 @@ namespace ComputeService
         private string fileName;
         private DirectoryInfo dirInfo;
         public static string packageLocation;
-        public static int instances = 0;
+        public static int instances;
         public static bool changed = false;
 
         public XmlHelper()
         {
+            instances = 0;
             using (XmlReader reader = XmlReader.Create(@"C:\Users\stefan\Desktop\Project\ComputeService\package.xml"))
             {
                 while (reader.Read())
@@ -45,17 +46,20 @@ namespace ComputeService
 
         // string PackageLocation { get { return packageLocation; } }
 
-        private async Task Read(string inputUri)
+        private void Read(string inputUri)
         {
-            XmlReaderSettings settings = new XmlReaderSettings();
-            settings.Async = true;
+            //XmlReaderSettings settings = new XmlReaderSettings();
+            //settings.Async = true;
 
-            using (XmlReader reader = XmlReader.Create(inputUri, settings))
+            using (XmlReader reader = XmlReader.Create(inputUri))
             {
-                while (await reader.ReadAsync())
+                while (reader.Read())
                 {
                     if (reader.NodeType == XmlNodeType.Element && reader.Name == "instances")
+                    {
                         instances = reader.ReadElementContentAsInt();
+                        break;
+                    }
                 }
             }
         }
@@ -74,9 +78,9 @@ namespace ComputeService
                         changed = true;
                     }
 
-                    Task readTask = Read(files[0].FullName);
-
-                    await readTask;
+                    /*Task readTask = */Read(files[0].FullName);
+                    
+                    //await readTask;
                 }
                 else if (files.Length > 1)
                 {

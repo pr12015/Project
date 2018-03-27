@@ -13,16 +13,24 @@ namespace ComputeService
     class Service : IWorkerRole
     {
         private IContainer proxy;
+        static volatile bool exit = false;
 
         public Service() { }
 
         public void Start()
         {
             string fileName = "", src = "", dest = "";
-            while (true)
+
+            Task.Factory.StartNew(() =>
             {
-                if (XmlHelper.changed)
-                {                   
+                while (Console.ReadKey(true).Key != ConsoleKey.Q) ;
+                exit = true;
+            });
+
+            while (!exit)
+            {
+                if (XmlHelper.changed || fileName != "")
+                {
                     var files = Directory.GetFiles(@XmlHelper.packageLocation, "*.dll");
                     if (files.Length == 1)
                     {
@@ -34,14 +42,28 @@ namespace ComputeService
                         Console.WriteLine("ERROR: Onlu one dll at the time.");
                     else
                         Console.WriteLine("ERROR: Dll file missing from package.");
+
                     for (int i = 0; i < XmlHelper.instances; ++i)
                     {
                         string __dest = dest + (i + 1) + "\\" + fileName;
-                        File.Copy(src, __dest);
-                        Connect(i);
-                        proxy.Load((i + 1) + "\\" + fileName); // (i + 1) to load from appropriate folder
+                        try
+                        {
+                            File.Copy(src, __dest);                            
+                        }
+                        catch(Exception e)
+                        {
+                        //    File.SetAttributes(__dest, FileAttributes.Normal);
+                        //    File.Delete(__dest);
+                        }
+
+                        try
+                        {
+                            Connect(i);
+                            proxy.Load((i + 1) + "\\" + fileName); // (i + 1) to load from appropriate folder
+                        }
+                        catch(Exception e) { Stop(i + 1); }
                     }
-                    DeleteFiles(XmlHelper.packageLocation);
+                    //DeleteFiles(XmlHelper.packageLocation);
                     XmlHelper.changed = false;
                 }
             }
@@ -83,8 +105,22 @@ namespace ComputeService
         
         public void Stop()
         {
-            for (int i = 1; i <= 4; ++i)
-                Directory.Delete(@"C:\users\stefan\Desktop\containers\Container" + i);
+            foreach (Process p in Program.processes)
+                p.CloseMainWindow();
+                //p.Close();
+            
+
+            /*foreach(string dir in Directory.GetDirectories(@"C:\users\stefan\Desktop\containers\"))
+            {
+                DeleteFiles(dir);
+                Directory.Delete(dir);
+            }*/
+        }
+        public void Stop(int id)
+        {            
+            DeleteFiles(@"C:\users\stefan\Desktop\containers\Container" + id);
+
+            Directory.Delete(@"C:\users\stefan\Desktop\containers\Container" + id);
         }
 
         public void DeleteFiles(string uri)
@@ -97,7 +133,7 @@ namespace ComputeService
             }
         }
 
-        // Conect to Containers WCF server
+        // Connect to Containers WCF server
         public void Connect(int id)
         {
             NetTcpBinding binding = new NetTcpBinding();

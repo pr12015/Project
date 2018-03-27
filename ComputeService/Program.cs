@@ -13,6 +13,9 @@ namespace ComputeService
 {
     class Program
     {
+        public static Process[] processes = new Process[4];
+
+
         static void Main(string[] args)
         {           
             Service service = new Service();
@@ -30,31 +33,15 @@ namespace ComputeService
             Task readAsync = xmlHelper.AsyncRead();
 
             service.Start();
-            Console.ReadKey(true);
             service.Stop();
-            
 
-            
-            /*
-            while (true)
-            {
-                if (XmlHelper.changed)
-                {
-                    for(int i = 0; i < XmlHelper.instances; ++i)
-                    {
-
-                    }
-
-                    XmlHelper.changed = false;
-                }
-            }*/
-           // Console.ReadKey(true);
+            Console.WriteLine("press any key to exit...");
+            Console.ReadKey(true);
         }
 
         // start 4 container apps (console apps) and create a direcotry for each
         public static void Start()
         {
-            Process[] processes = new Process[4];
             ProcessStartInfo startInfo = new ProcessStartInfo
             {
                 FileName = @"C:\Users\stefan\Desktop\HelloWorld\HelloWorld\bin\Debug\HelloWorld.exe",
