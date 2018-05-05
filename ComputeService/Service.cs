@@ -10,16 +10,21 @@ using System.ServiceModel;
 
 namespace ComputeService
 {
-    class Service : IWorkerRole
+    class Service
     {
         private IContainer proxy;
-        static volatile bool exit = false;
+        private int instances;
 
-        public Service() { }
+        // To determine when to shutdown the program
+        private static volatile bool exit = false;
+
+        public Service(int instances) { this.instances = instances; }
 
         public void Start()
         {
-            string fileName = "", src = "", dest = "";
+            // lacations and filename of the dll package to be copied
+            string fileName = "", src = "";
+            string dest = @"C:\users\stefan\Desktop\containers\Container";
 
             Task.Factory.StartNew(() =>
             {
@@ -29,62 +34,63 @@ namespace ComputeService
 
             while (!exit)
             {
-                if (XmlHelper.changed || fileName != "")
+                if (XmlHelper.Changed )
                 {
-                    var files = Directory.GetFiles(@XmlHelper.packageLocation, "*.dll");
+                    // Only 4 instances are allowed.
+                    if(XmlHelper.Instances > 4)
+                    {
+                        throw new Exception("Cannot have more than 4 instances. Change the congfig file.");
+                    }
+
+                    var files = Directory.GetFiles(@XmlHelper.PackageLocation, "*.dll");
+
+                    // Extract the dll name.
                     if (files.Length == 1)
                     {
                         fileName = files[0].Split('\\')[5];
                         src = files[0];
-                        dest = @"C:\users\stefan\Desktop\containers\Container";
                     }
                     else if (files.Length > 1)
-                        Console.WriteLine("ERROR: Only one dll at the time.");
-                    else
-                        Console.WriteLine("ERROR: Dll file missing from package.");
-
-                    for (int i = 0; i < XmlHelper.instances; ++i)
                     {
-                        string __dest = dest + (i + 1) + "\\" + fileName;
+                        Console.WriteLine("ERROR: Only one dll at the time.");
+                    }
+                    else
+                    {
+                        Console.WriteLine("ERROR: Dll file missing from package.");
+                    }
+
+                    // Copy the dll, and call Load().
+                    for (int i = 0; i < XmlHelper.Instances; ++i)
+                    {
+                        string assemblyDest = dest + (i + 1) + "\\" + fileName;
                         try
                         {
-                            File.Copy(src, __dest);
+                            File.Copy(src, assemblyDest);
                         }
-                        catch (Exception e) { }
+                        catch (Exception e)
+                        {
+                            // dll already copied.
+                            // Catching exception to prevent program from breaking.
+                            // Console.WriteLine(e.Message);
+                        }
 
                         try
                         {
                             Connect(i);
-                            proxy.Load((i + 1) + "\\" + fileName); // (i + 1) to load from appropriate folder
-                            File.Delete(dest + (i + 1) + "\\" + fileName);
+                            string containerResponse = proxy.Load(assemblyDest);
+                            Console.WriteLine(containerResponse);
                             System.Threading.Thread.Sleep(200);
                         }
-                        catch(Exception e) { Stop(i + 1); }
+                        catch (Exception e)
+                        {
+                            Console.WriteLine(e.Message);
+                        }
                     }
-                    //DeleteFiles(XmlHelper.packageLocation);
-                    XmlHelper.changed = false;
+                    XmlHelper.Changed = false;
                 }
             }
         }
         
-        public void Stop()
-        {
-            foreach (Process p in Program.processes)
-                p.CloseMainWindow();
-                //p.Close();
-            
-
-            foreach(string dir in Directory.GetDirectories(@"C:\users\stefan\Desktop\containers\"))
-            {
-                Directory.Delete(dir);
-            }
-        }
-        public void Stop(int id)
-        {
-            File.Delete(@"C:\users\stefan\Desktop\containers\Container" + id);
-            Directory.Delete(@"C:\users\stefan\Desktop\containers\Container" + id);
-        }
-
         // Connect to Containers WCF server
         public void Connect(int id)
         {
@@ -93,5 +99,37 @@ namespace ComputeService
 
             proxy = factory.CreateChannel();
         }
+
+        public void Stop()
+        {
+            foreach (Process p in Program.processes)
+            {
+                try
+                {
+                    p.Kill();
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e.Message);
+                }
+            }
+            for (int i = 1; i < 5; ++i)
+                DeleteFile(i);
+            
+            foreach(string dir in Directory.GetDirectories(@"C:\users\stefan\Desktop\containers\"))            
+                Directory.Delete(dir);
+        }
+
+        public void DeleteFile(int id)
+        {
+            File.Delete(@"C:\users\stefan\Desktop\containers\Container" + id + @"\DLL1.dll");
+        }
+
+        //public void Stop(int id)
+        //{
+        //    //File.SetAttributes(@"C:\users\stefan\Desktop\containers\Container" + id, FileAttributes.Normal);
+        //    File.Delete(@"C:\users\stefan\Desktop\containers\Container" + id + "DLL1.dll");
+        //    Directory.Delete(@"C:\users\stefan\Desktop\containers\Container" + id);
+        //}
     }
 }

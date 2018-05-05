@@ -10,7 +10,7 @@ namespace Contracts
     [ServiceContract]
     public interface IContainer {
         [OperationContract]
-        string Load(string assemblyName);
+        string Load(string assemblyPath);
 
         [OperationContract]
         string Load_c();

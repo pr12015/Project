@@ -6,10 +6,20 @@ using System.Threading.Tasks;
 
 namespace DLL1
 {
-    public class DllHello
+    public class DllHello : Contracts.IWorkerRole
     {
         public DllHello() { }
 
-        public void Greet(string message) { Console.WriteLine("Greetings {0}!", message); }
+        public void Start()
+        {
+            Greet();
+        }
+
+        public void Stop()
+        {
+
+        }
+
+        public void Greet() { Console.WriteLine("Hello from dll hell"); }
     }
 }

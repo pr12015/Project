@@ -12,10 +12,16 @@ namespace ComputeService
     {
         private string fileName;
         private DirectoryInfo dirInfo;
-        public static string packageLocation;
-        public static int instances;
-        public static bool changed = false;
+        private static int instances;
 
+        #region Properties
+        public static string PackageLocation { get; set; }
+        public static int Instances { get { return instances; } set { instances = value; } }
+        public static bool Changed { get; set; } = false;
+        #endregion
+
+        // Constructor
+        // Finds the location of the config file by reading `package.xml`
         public XmlHelper()
         {
             instances = 0;
@@ -25,13 +31,13 @@ namespace ComputeService
                 {
                     if (reader.NodeType == XmlNodeType.Element && reader.Name == "location")
                     {
-                        packageLocation = reader.ReadElementContentAsString();
+                        PackageLocation = reader.ReadElementContentAsString();
                         break;
-                    }
+                    }                    
                 }
             }
 
-            dirInfo = new DirectoryInfo(@packageLocation);
+            dirInfo = new DirectoryInfo(PackageLocation);
 
             try
             {
@@ -44,43 +50,56 @@ namespace ComputeService
             }
         }
 
-        // string PackageLocation { get { return packageLocation; } }
 
+        // Reads the config file and stores the number of instances.
         private void Read(string inputUri)
         {
-            //XmlReaderSettings settings = new XmlReaderSettings();
-            //settings.Async = true;
-
             using (XmlReader reader = XmlReader.Create(inputUri))
             {
                 while (reader.Read())
                 {
                     if (reader.NodeType == XmlNodeType.Element && reader.Name == "instances")
                     {
-                        instances = reader.ReadElementContentAsInt();
+                        int instanceNumber = reader.ReadElementContentAsInt();
+                        if (instances != instanceNumber)
+                        {
+                            instances = instanceNumber;
+                            Changed = true;
+                            //if (reader.ReadElementContentAsInt() < 5)
+                            //{
+                            //    instances = reader.ReadElementContentAsInt();
+                            //    changed = true;
+                            //}
+                            //else
+                            //{
+                            //    // throw new Exception("Cannot have more than 4 instances. Change the congfig file.");
+                            //    Console.WriteLine("Cannot have more than 4 instances. Change the congfig file.");
+                            //}
+                        }
+                                                    
                         break;
                     }
                 }
             }
         }
 
-        public async Task<int> AsyncRead()
+        
+        // Checks the predefined location for changes in config file.       
+        public async Task AsyncRead()
         {
             while (true)
             {
-
+                // changed = false;
                 FileInfo[] files = dirInfo.GetFiles("*.xml");
                 if (files.Length == 1)
                 {
                     if (files[0].Name != fileName)
                     {
                         fileName = files[0].Name;
-                        changed = true;
+                        Changed = true;
                     }
 
-                    /*Task readTask = */Read(files[0].FullName);
-                    
-                    //await readTask;
+                    Read(files[0].FullName); 
                 }
                 else if (files.Length > 1)
                 {
@@ -90,7 +109,7 @@ namespace ComputeService
                 else
                 {
                     Console.WriteLine("WARNING: Config file could not be found.");
-                    Console.WriteLine("Add a config file to {0}", dirInfo.FullName); // dirInfo.FullName should be replaced with configurable xml element value!
+                    Console.WriteLine("Add a config file to {0}", dirInfo.FullName);
                 }
                 await Task.Delay(1000);
             }
