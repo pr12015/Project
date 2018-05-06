@@ -34,11 +34,12 @@ namespace ComputeService
 
             while (!exit)
             {
-                if (XmlHelper.Changed )
+                if (XmlHelper.Changed)
                 {
                     // Only 4 instances are allowed.
                     if(XmlHelper.Instances > 4)
                     {
+                        XmlHelper.Changed = false;
                         throw new Exception("Cannot have more than 4 instances. Change the congfig file.");
                     }
 
