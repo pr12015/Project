@@ -33,7 +33,6 @@ namespace ComputeService
             XmlHelper xmlHelper = new XmlHelper();
 
             Task readAsync = xmlHelper.AsyncRead();
-            //readAsync.Wait();
             Service service = new Service(XmlHelper.Instances);
             bool serviceSuccess = false;
             while (!serviceSuccess)
@@ -57,27 +56,34 @@ namespace ComputeService
         // start 4 container apps (console apps) and create a direcotry for each
         public static void Start()
         {
-            ProcessStartInfo startInfo = new ProcessStartInfo
-            {
-                FileName = containerAppPath,
-                WindowStyle = ProcessWindowStyle.Minimized
-            };
+            //// TODO: put inside of for loop and check if it works
+            //ProcessStartInfo startInfo = new ProcessStartInfo
+            //{
+            //    FileName = containerAppPath,
+            //    WindowStyle = ProcessWindowStyle.Minimized
+            //};
 
             Directory.CreateDirectory(containerPath);
 
-            int port = 10010;
+            int port = 10011;
 
             for (int i = 0; i < 4; ++i)
             {
+                ProcessStartInfo startInfo = new ProcessStartInfo
+                {
+                    FileName = containerAppPath,
+                    WindowStyle = ProcessWindowStyle.Minimized,
+                    UseShellExecute = true,
+                    Arguments = (port + i * 10).ToString()
+                };
+                
+                processes[i] = new Process
+                {
+                    StartInfo = startInfo
+                };
+
                 try
                 {
-                    startInfo.UseShellExecute = true;
-                    startInfo.Arguments = (port + i * 10).ToString();
-                    processes[i] = new Process
-                    {
-                        StartInfo = startInfo
-                    };
-
                     processes[i].Start();
                     Directory.CreateDirectory(specificContainerPath + (i + 1));
                 }
@@ -88,6 +94,9 @@ namespace ComputeService
             }
         }
 
-
+        public static void Restart(int i)
+        {
+            processes[i].Start();
+        }
     }
 }

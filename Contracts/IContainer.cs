@@ -13,6 +13,9 @@ namespace Contracts
         string Load(string assemblyPath);
 
         [OperationContract]
+        string CheckState();
+
+        [OperationContract]
         string Load_c();
 
 
