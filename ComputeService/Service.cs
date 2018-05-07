@@ -16,14 +16,13 @@ namespace ComputeService
         private IContainer[] proxy = new IContainer[4];
         private int instances;
         private bool[] busy = new bool[4];
-        //private bool[] alive = new bool[4];
         private bool stopChecking = false;
 
         // To determine when to shutdown the program
         private static volatile bool exit = false;
 
         public Service(int instances) { this.instances = instances; }
-
+        
         public void Start()
         {
             ConnectAll();

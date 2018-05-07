@@ -22,7 +22,9 @@ namespace ComputeService
 
 
         static void Main(string[] args)
-        {           
+        {
+            Server server = new Server();
+
             Console.WriteLine("Press any key to start service. . .");
             Console.ReadKey(true);
 
@@ -53,16 +55,11 @@ namespace ComputeService
             Console.ReadKey(true);
         }
 
-        // start 4 container apps (console apps) and create a direcotry for each
+        /// <summary>
+        ///     Starts 4 container apps and creates a direcotry for each.
+        /// </summary>
         public static void Start()
         {
-            //// TODO: put inside of for loop and check if it works
-            //ProcessStartInfo startInfo = new ProcessStartInfo
-            //{
-            //    FileName = containerAppPath,
-            //    WindowStyle = ProcessWindowStyle.Minimized
-            //};
-
             Directory.CreateDirectory(containerPath);
 
             int port = 10011;
@@ -92,11 +89,6 @@ namespace ComputeService
                     Console.WriteLine(e.Message);
                 }
             }
-        }
-
-        public static void Restart(int i)
-        {
-            processes[i].Start();
         }
     }
 }

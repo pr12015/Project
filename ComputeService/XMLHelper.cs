@@ -12,19 +12,19 @@ namespace ComputeService
     {
         private string fileName;
         private DirectoryInfo dirInfo;
-        private static int instances;
 
         #region Properties
         public static string PackageLocation { get; set; }
-        public static int Instances { get { return instances; } set { instances = value; } }
+        public static int Instances { get; set; }
         public static bool Changed { get; set; } = false;
         #endregion
 
-        // Constructor
-        // Finds the location of the config file by reading `package.xml`
+        /// <summary>
+        ///     Finds the location of the config file by reading `package.xml`
+        /// </summary>
         public XmlHelper()
         {
-            instances = 0;
+            Instances = 0;
             using (XmlReader reader = XmlReader.Create(@"C:\Users\stefan\Desktop\Project\ComputeService\package.xml"))
             {
                 while (reader.Read())
@@ -50,8 +50,10 @@ namespace ComputeService
             }
         }
 
-
-        // Reads the config file and stores the number of instances.
+        /// <summary>
+        ///     Reads the config file and stores the number of instances.
+        /// </summary>
+        /// <param name="inputUri"> location of the config file </param>
         private void Read(string inputUri)
         {
             using (XmlReader reader = XmlReader.Create(inputUri))
@@ -61,20 +63,10 @@ namespace ComputeService
                     if (reader.NodeType == XmlNodeType.Element && reader.Name == "instances")
                     {
                         int instanceNumber = reader.ReadElementContentAsInt();
-                        if (instances != instanceNumber)
+                        if (Instances != instanceNumber)
                         {
-                            instances = instanceNumber;
+                            Instances = instanceNumber;
                             Changed = true;
-                            //if (reader.ReadElementContentAsInt() < 5)
-                            //{
-                            //    instances = reader.ReadElementContentAsInt();
-                            //    changed = true;
-                            //}
-                            //else
-                            //{
-                            //    // throw new Exception("Cannot have more than 4 instances. Change the congfig file.");
-                            //    Console.WriteLine("Cannot have more than 4 instances. Change the congfig file.");
-                            //}
                         }
                                                     
                         break;
@@ -83,8 +75,10 @@ namespace ComputeService
             }
         }
 
-        
-        // Checks the predefined location for changes in config file.       
+        /// <summary>
+        ///     Checks the predefined location for changes in config file.
+        /// </summary>
+        /// <returns></returns>
         public async Task AsyncRead()
         {
             while (true)

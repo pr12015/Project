@@ -44,6 +44,7 @@
     <Compile Include="DllHello.cs" />
     <Compile Include="ICompute.cs" />
     <Compile Include="IContainer.cs" />
+    <Compile Include="IRoleEnvironment.cs" />
     <Compile Include="IWorkerRole.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
