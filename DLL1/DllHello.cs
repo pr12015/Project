@@ -22,7 +22,13 @@ namespace DLL1
 
             address = proxy.GetAddress("DLL1.dll", containerId);
 
-            Console.WriteLine(address);
+            Console.WriteLine("Address: address");
+
+            var brotherInstances = proxy.BrotherInstances("DLL1.dll", address);
+
+            Console.Write("BrotherInstances: ");
+            foreach (string s in brotherInstances)
+                Console.WriteLine(s);
 
             Greet();
         }

@@ -42,9 +42,37 @@ namespace ComputeService
             return null;
         }
 
+        /// <summary>
+        ///     Returns list of 'brother-containers'.
+        ///     Containers are identified by containerId
+        ///     which is the port opened by container.
+        /// </summary>
+        /// <param name="myAssemblyName"> Dll name </param>
+        /// <param name="myAddress"> dll location </param>
+        /// <returns> List of 'brother-containers' </returns>
         public string[] BrotherInstances(string myAssemblyName, string myAddress)
         {
-            return null;
+            var dirs = Directory.GetDirectories(containerPath);
+            string[] brotherInstances = new string[3];
+            int j = 0;
+
+            foreach(string d in dirs)
+            {
+                var files = Directory.GetFiles(d);
+                if (files.Contains(myAddress + "\\" + myAssemblyName))
+                    continue;
+
+                string container = d.Split('\\')[5];
+                int i = Int32.Parse(container.Last().ToString());
+
+                --i;
+
+                string containerId = (10011 + i * 10).ToString();
+                if(j < XmlHelper.Instances)
+                    brotherInstances[j++] = containerId;
+            }
+
+            return brotherInstances;
         }
     }
 }

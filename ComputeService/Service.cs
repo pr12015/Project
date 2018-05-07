@@ -37,7 +37,7 @@ namespace ComputeService
             {
                 if (XmlHelper.Changed)
                 {
-                    // Only 4 instances are allowed.
+                    // Only 4 instances are allowed. 
                     if (XmlHelper.Instances > 4)
                     {
                         XmlHelper.Changed = false;
@@ -297,6 +297,7 @@ namespace ComputeService
                             try
                             {
                                 Program.processes[i].Start();
+                                Connect(i);
                                 resurrected = true;
                             }
                             catch (Exception e1)
