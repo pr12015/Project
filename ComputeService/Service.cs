@@ -15,11 +15,13 @@ namespace ComputeService
     {
         private IContainer[] proxy = new IContainer[4];
         private int instances;
-        private bool[] busy = new bool[4];
+        private static bool[] busy = new bool[4];
         private bool stopChecking = false;
 
         // To determine when to shutdown the program
         private static volatile bool exit = false;
+
+        public static bool[] Busy { get { return busy; } }
 
         public Service(int instances) { this.instances = instances; }
         
@@ -136,6 +138,9 @@ namespace ComputeService
                 Console.WriteLine(e.Message);
                 return false;
             }
+
+            for (int j = 0; j < 4; ++j)
+                Console.WriteLine($"Container {j} is: " + (busy[j] ? "busy" : "not busy"));
 
             return true;
         }
@@ -268,11 +273,12 @@ namespace ComputeService
                     }
                     else
                     {
+                        busy[i] = false;
                         // Check for container that is not running a dll.
                         // If found run the dll, then restart the container.
-                        for(int j = 0; j < 4; ++j)
+                        for (int j = 0; j < 4; ++j)
                         {
-                            if (!busy[j])
+                            if (!busy[j] && j != i)
                             {
                                 LoadDll(j);
                                 try
@@ -281,6 +287,7 @@ namespace ComputeService
                                     {
                                         Program.processes[i].Start();
                                         resurrected = true;
+
                                         break;
                                     }
                                 }

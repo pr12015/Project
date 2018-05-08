@@ -13,6 +13,7 @@ namespace ComputeService
     public class RoleEnvironment : IRoleEnvironment
     {
         public static string containerPath = @"C:\users\stefan\Desktop\containers";
+        bool firstPass = true;
 
         /// <summary>
         ///     Finds the address of the dll running in container
@@ -54,23 +55,46 @@ namespace ComputeService
         {
             var dirs = Directory.GetDirectories(containerPath);
             string[] brotherInstances = new string[3];
-            int j = 0;
+            int j = 0, idx = 5;
 
             foreach(string d in dirs)
             {
                 var files = Directory.GetFiles(d);
-                if (files.Contains(myAddress + "\\" + myAssemblyName))
-                    continue;
 
                 string container = d.Split('\\')[5];
                 int i = Int32.Parse(container.Last().ToString());
 
                 --i;
 
-                string containerId = (10011 + i * 10).ToString();
-                if(j < XmlHelper.Instances)
-                    brotherInstances[j++] = containerId;
+                if (files.Contains(myAddress + "\\" + myAssemblyName))
+                {
+                    idx = i;
+                    continue;
+                }
+                else if (firstPass)
+                {
+                    
+                    if (Service.Busy[i] && i != idx && j < XmlHelper.Instances - 1)
+                    {
+                        string containerId = (10011 + i * 10).ToString();
+                        brotherInstances[j++] = containerId;
+                    }
+                }
+                else
+                {
+                    for(int k = 0; k < XmlHelper.Instances; ++k)
+                    {
+                        if(k != idx && Service.Busy[k])
+                        {
+                            string containerId = (10011 + i * 10).ToString();
+                            brotherInstances[j++] = containerId;
+                        }
+                    }
+                }
             }
+
+            if (firstPass)
+                firstPass = false;
 
             return brotherInstances;
         }
