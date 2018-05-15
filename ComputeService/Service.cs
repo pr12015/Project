@@ -11,7 +11,7 @@ using System.Threading;
 
 namespace ComputeService
 {
-    class Service
+    public class Service
     {
         private IContainer[] proxy = new IContainer[4];
         private int instances;

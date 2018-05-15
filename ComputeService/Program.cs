@@ -11,7 +11,7 @@ using System.IO;
 
 namespace ComputeService
 {
-    class Program
+    public class Program
     {
         public static Process[] processes = new Process[4];
 
